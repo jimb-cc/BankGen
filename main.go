@@ -76,10 +76,13 @@ func main() {
 
 }
 
+// A little function for making a percentage, constraines to 2 decimal places
 func pct(min, max float64) float64 {
 	return math.Round((rand.Float64()*(max-min)+min)*1000) / 1000
 }
 
+// Another little function for creating random balances,
+// esentialy using a StdDev model, but with min+max clamps
 func bal(seed float64) float64 {
 
 	nf := rand.NormFloat64()
@@ -94,10 +97,12 @@ func bal(seed float64) float64 {
 	return v
 }
 
+//create the documents
 func createDocs(ctx context.Context, db *mongo.Database, batchSize int, docsLeft int) error {
 
 	fmt.Printf("--starting to create documents in batches of %v\n", batchSize)
 
+	// some arrays of various options
 	countries := []string{"EN", "EN", "EN", "EN", "FR", "FR", "DE", "DE", "IT", "IT", "ES", "PT", "GR", "DN", "SE"}
 	branch := []string{"EC-1", "EC-2", "EC-3", "EC-4"}
 
@@ -111,12 +116,13 @@ func createDocs(ctx context.Context, db *mongo.Database, batchSize int, docsLeft
 			doc := bson.D{
 				{"name", gofakeit.Name()},
 				{"branch", gofakeit.StreetName() + " " + gofakeit.StreetSuffix()},
-				{"branch_id", countries[rand.Intn(len(branch))]},
+				{"branch_id", branch[rand.Intn(len(branch))]},
 				{"manager", gofakeit.Name()},
 				{"country", countries[rand.Intn(len(countries))]},
 				{"rankLevel", rand.Intn(10)},
 			}
 
+			// which bank products should this user have?
 			i := rand.Intn(6)
 
 			switch i {
@@ -157,6 +163,7 @@ func createDocs(ctx context.Context, db *mongo.Database, batchSize int, docsLeft
 			docs = append(docs, doc)
 		}
 
+		// insert the docs into the DB.
 		docsLeft = docsLeft - batchSize
 		fmt.Printf("%v Docs left to process\n", docsLeft)
 
